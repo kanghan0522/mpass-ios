@@ -1,0 +1,54 @@
+name: Extract iOS mPaaS SDK
+
+# 수동으로 스크립트를 실행할 수 있도록 설정
+on: 
+  workflow_dispatch:
+
+jobs:
+  build:
+    # GitHub에서 제공하는 무료 Mac 환경 사용
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install mPaaS CocoaPods Plugin
+        run: |
+          sh <(curl -s http://mpaas-ios.oss-cn-hangzhou.aliyuncs.com/cocoapods/installmPaaSCocoaPodsPlugin.sh)
+
+      - name: Create Dummy Xcode Project & Podfile
+        run: |
+          # 빈 Podfile 생성
+          cat <<EOF > Podfile
+          plugin "cocoapods-mPaaS"
+          source 'https://gitee.com/mpaas/podspecs.git'
+          source 'https://github.com/CocoaPods/Specs.git'
+
+          platform :ios, '12.0'
+          mPaaS_baseline '10.2.3'
+
+          # 임시 타겟 설정
+          target 'mPaaS_Forensics' do
+            use_frameworks!
+            mPaaS_pod "mPaaS_DataCenter"
+          end
+          EOF
+
+      - name: Download SDK via CocoaPods
+        run: |
+          # mPaaS 베이스라인 업데이트 및 의존성 설치
+          pod mpaas update 10.2.3
+          pod install
+
+      - name: Zip the downloaded Frameworks
+        run: |
+          # 다운로드된 Pods 폴더를 zip으로 압축
+          zip -r mPaaS_iOS_SDK.zip Pods/
+
+      - name: Upload Artifact for Download
+        uses: actions/upload-artifact@v4
+        with:
+          name: mPaaS_Official_Frameworks
+          path: mPaaS_iOS_SDK.zip
+          retention-days: 1 # 다운로드 후 자동 삭제 (공간 절약)
