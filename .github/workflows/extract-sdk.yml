@@ -17,9 +17,9 @@ jobs:
 
       - name: Create Dummy Xcode Project & Podfile
         run: |
-          # [에러 해결!] CocoaPods가 인식할 수 있는 빈 Xcode 프로젝트 생성
+          # [에러 최종 해결!] 타겟(Target)이 포함된 완전한 빈 Xcode 프로젝트 생성
           gem install xcodeproj
-          ruby -e "require 'xcodeproj'; Xcodeproj::Project.new('mPaaS_Forensics.xcodeproj').save"
+          ruby -e "require 'xcodeproj'; project = Xcodeproj::Project.new('mPaaS_Forensics.xcodeproj'); project.new_target(:application, 'mPaaS_Forensics', :ios); project.save"
 
           # 빈 Podfile 생성
           cat <<EOF > Podfile
