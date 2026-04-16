@@ -15,13 +15,16 @@ jobs:
         run: |
           sh <(curl -s http://mpaas-ios.oss-cn-hangzhou.aliyuncs.com/cocoapods/installmPaaSCocoaPodsPlugin.sh)
 
-      - name: Create Dummy Xcode Project & Podfile
+      - name: Create Dummy Xcode Project & Config & Podfile
         run: |
-          # [에러 최종 해결!] 타겟(Target)이 포함된 완전한 빈 Xcode 프로젝트 생성
+          # 1. 타겟이 포함된 빈 Xcode 프로젝트 생성
           gem install xcodeproj
           ruby -e "require 'xcodeproj'; project = Xcodeproj::Project.new('mPaaS_Forensics.xcodeproj'); project.new_target(:application, 'mPaaS_Forensics', :ios); project.save"
 
-          # 빈 Podfile 생성
+          # 2. [에러 해결!] mPaaS 플러그인 검사를 우회할 가짜 Config 파일 생성 (Base64 인코딩된 더미 JSON)
+          echo "eyJhcHBJZCI6Im1QYWFTRm9yZW5zaWNzIiwiYXBwS2V5IjoiZHVtbXlBcHBLZXkiLCJ3b3Jrc3BhY2VJZCI6ImRlZmF1bHQiLCJ0ZW5hbnRJZCI6ImR1bW15VGVuYW50In0=" > dummy-dummy-iOS.config
+
+          # 3. 빈 Podfile 생성
           cat <<EOF > Podfile
           plugin "cocoapods-mPaaS"
           source 'https://gitee.com/mpaas/podspecs.git'
