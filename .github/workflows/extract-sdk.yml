@@ -21,8 +21,15 @@ jobs:
           gem install xcodeproj
           ruby -e "require 'xcodeproj'; project = Xcodeproj::Project.new('mPaaS_Forensics.xcodeproj'); project.new_target(:application, 'mPaaS_Forensics', :ios); project.save"
 
-          # 2. [에러 해결!] mPaaS 플러그인 검사를 우회할 가짜 Config 파일 생성 (Base64 인코딩된 더미 JSON)
-          echo "eyJhcHBJZCI6Im1QYWFTRm9yZW5zaWNzIiwiYXBwS2V5IjoiZHVtbXlBcHBLZXkiLCJ3b3Jrc3BhY2VJZCI6ImRlZmF1bHQiLCJ0ZW5hbnRJZCI6ImR1bW15VGVuYW50In0=" > dummy-dummy-iOS.config
+          # 2. [수정됨] Base64가 아닌 순수 JSON 텍스트 형태로 가짜 Config 파일 생성
+          cat <<EOF > dummy-dummy-iOS.config
+          {
+            "appId": "mPaaSForensics",
+            "appKey": "dummyAppKey",
+            "workspaceId": "default",
+            "tenantId": "dummyTenant"
+          }
+          EOF
 
           # 3. 빈 Podfile 생성
           cat <<EOF > Podfile
